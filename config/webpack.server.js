@@ -25,7 +25,7 @@ const serverConfig = {
     ]
   },
   output: {
-    filename: 'bundle.js',
+    filename: 'app.js',
     path: path.resolve(__dirname, '../build')
   }
 };

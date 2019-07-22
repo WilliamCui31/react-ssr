@@ -7,24 +7,24 @@ import { Helmet } from 'react-helmet';
 import routes from '../routes';
 import { getStore } from '../store';
 
-export default async ctx => {
-  const store = getStore();
-  // 根据路由的路径，来往store里面加数据
-  const matchedRoutes = matchRoutes(routes, ctx.path);
+const store = getStore();
+
+async function loadData(store, path) {
   const promises = [];
-  matchedRoutes.forEach(item => {
-    if (item.route.loadData) {
-      const promise = new Promise((resolve, reject) => {
-        item.route
-          .loadData(store)
-          .then(resolve)
-          .catch(resolve);
-      });
-      promises.push(promise);
+  const matchedRoutes = matchRoutes(routes, path);
+  matchedRoutes.forEach(({ route }) => {
+    const { loadData } = route;
+    if (loadData) {
+      promises.push(loadData(store));
     }
   });
 
   await Promise.all(promises);
+}
+
+export default async ctx => {
+  // 根据路由的路径，来往store里面加数据
+  await loadData(store, ctx.path);
 
   let context = { css: [] };
   const content = renderToString(
